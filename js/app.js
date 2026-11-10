@@ -257,7 +257,7 @@
     const r = parse();
     document.body.dataset.route = r.name;
     track.classList.remove('is-ready');
-    track.innerHTML = r.html() + (r.name === 'home' ? '' : footer());
+    track.innerHTML = r.html() + footer();
     $$('[data-tg]').forEach((a) => (a.href = SITE.telegram));
     S.x = S.t = 0; track.style.transform = ''; scrollTo(0, 0);
     heroImg = $('.hero__media img', track);
