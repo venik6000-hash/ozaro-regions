@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OZARO — декоративные покрытия для дизайнеров и архитекторов в регионах России</title>
+<meta name="description" content="OZARO в регионах России: архитектурные краски и декоративные штукатурки. Партнёрская программа для дизайнеров и архитекторов, выкрасы в ваш город, сопровождение объекта.">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <ul class="nav__list" id="navList"></ul>
+  <button class="nav__cta" data-panel="partner">Стать партнёром</button>
+  <button class="nav__burger" id="burger">Меню</button>
+</header>
+
+<!-- Полноэкранное меню «Информация» / мобильное меню -->
+<div class="modal" id="modal" aria-hidden="true">
+  <button class="modal__close" data-close-modal>☓ Закрыть</button>
+  <ol class="modal__list" id="modalList"></ol>
+</div>
+
+<!-- Основная горизонтальная лента -->
+<div class="wrapper" id="wrapper">
+  <main class="track" id="track"></main>
+</div>
+<div class="progress"><i id="progress"></i></div>
+
+<!-- Выезжающие панели -->
+<div class="overlay" id="overlay">
+  <div class="overlay__bg" data-close-panel></div>
+
+  <aside class="panel panel--wide" id="panel-partner">
+    <div class="panel__head"><span>Партнёрская программа</span><button data-close-panel>☓</button></div>
+    <div class="panel__main">
+      <h3 class="panel__title">: Стать партнёром</h3>
+      <p class="panel__text">Оставьте контакты — пришлём условия для дизайнеров и архитекторов, каталог покрытий и договоримся об отправке выкрасов в ваш город. Отвечаем в течение рабочего дня.</p>
+      <form class="form" id="partnerForm" novalidate>
+        <div class="form__grid">
+          <input name="name" placeholder="Имя и фамилия" required>
+          <input name="studio" placeholder="Студия / бюро">
+          <input name="city" placeholder="Город" required>
+          <input name="phone" placeholder="Телефон" inputmode="tel" required>
+          <input name="contact" placeholder="Telegram или e-mail">
+          <select name="role">
+            <option value="">Кто вы</option>
+            <option>Дизайнер интерьера</option>
+            <option>Архитектор</option>
+            <option>Комплектатор</option>
+            <option>Строительная компания</option>
+          </select>
+        </div>
+        <input type="hidden" name="interest">
+        <p class="form__interest" id="formInterest"></p>
+        <p class="form__error" id="formError"></p>
+        <label class="check"><input type="checkbox" name="agree" required><span>Согласен на обработку персональных данных</span></label>
+        <button class="btn btn--light btn--full" type="submit"><span>Отправить заявку</span></button>
+      </form>
+      <div class="form__done" id="formDone">
+        <h3 class="panel__title">Заявка принята.</h3>
+        <p class="panel__text">Свяжемся с вами в течение рабочего дня. Быстрее — в Telegram.</p>
+        <a class="btn btn--light" data-tg target="_blank" rel="noopener"><span>Написать в Telegram</span></a>
+      </div>
+    </div>
+  </aside>
+
+  <aside class="panel" id="panel-filter">
+    <div class="panel__head"><span id="filterCount">0 результатов</span><button data-close-panel>☓ Закрыть фильтр</button></div>
+    <div class="panel__main" id="filterMain"></div>
+    <div class="panel__actions">
+      <button class="link" id="filterReset">Сбросить все фильтры</button>
+      <button class="btn btn--light btn--full" data-close-panel><span id="filterShow">Показать результаты</span></button>
+    </div>
+  </aside>
+
+  <aside class="panel" id="panel-legal">
+    <div class="panel__head"><span>Информация</span><button data-close-panel>☓</button></div>
+    <div class="panel__main">
+      <h3 class="panel__title">Политика конфиденциальности</h3>
+      <p class="panel__text">Мы используем контактные данные из формы только для связи по вашей заявке и не передаём их третьим лицам. Чтобы удалить данные, напишите нам на почту или в Telegram.</p>
+      <p class="panel__text">Текст политики — заглушка. Перед запуском замените на утверждённый документ.</p>
+    </div>
+  </aside>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
