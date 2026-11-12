@@ -7,7 +7,6 @@
 
   const track = $('#track'), progress = $('#progress'), overlay = $('#overlay'), modal = $('#modal');
   const mq = matchMedia('(max-width: 820px)');
-  const isMobile = () => mq.matches;
 
   /* ───────── Шаблоны секций ───────── */
   const wordmark = () => `<div class="wordmark" aria-hidden="true">${[...SITE.brand].map((l) => `<span>${l}</span>`).join('')}</div>`;
@@ -188,57 +187,15 @@
     }
   };
 
-  /* ───────── Горизонтальный скролл с инерцией ───────── */
-  const S = { x: 0, t: 0, max: 0 };
-  const clamp = (v) => Math.max(0, Math.min(S.max, v));
-  const measure = () => { S.max = isMobile() ? 0 : Math.max(0, track.scrollWidth - innerWidth); S.t = clamp(S.t); };
-  const blocked = () => overlay.classList.contains('is-open') || modal.classList.contains('is-open');
-  const scrollToX = (x) => { S.t = clamp(x); };
-
-  addEventListener('wheel', (e) => {
-    if (isMobile() || e.ctrlKey) return;
-    if (blocked()) return;
-    const faq = e.target.closest('.faq');
-    if (faq && faq.scrollHeight > faq.clientHeight && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-      const atEnd = e.deltaY > 0 ? faq.scrollTop + faq.clientHeight >= faq.scrollHeight - 1 : faq.scrollTop <= 0;
-      if (!atEnd) return;
-    }
-    e.preventDefault();
-    const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    S.t = clamp(S.t + d * (e.deltaMode === 1 ? 32 : 1));
-  }, { passive: false });
-
-  addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { closePanel(); closeModal(); closeLightbox(); return; }
-    if (isMobile() || blocked() || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
-    const step = { ArrowRight: 240, ArrowDown: 240, ArrowLeft: -240, ArrowUp: -240, PageDown: innerWidth * .8, ' ': innerWidth * .8, PageUp: -innerWidth * .8 }[e.key];
-    if (step) { e.preventDefault(); S.t = clamp(S.t + step); }
-    if (e.key === 'Home') S.t = 0;
-    if (e.key === 'End') S.t = S.max;
-  });
-
-  // Перетаскивание (тач-экраны шире 820px и мышь)
-  let drag = null;
-  track.addEventListener('pointerdown', (e) => { if (isMobile() || e.pointerType === 'mouse' && e.button) return; drag = { x: e.clientX, t: S.t, moved: 0 }; });
-  addEventListener('pointermove', (e) => { if (!drag) return; const dx = e.clientX - drag.x; drag.moved = Math.max(drag.moved, Math.abs(dx)); if (drag.moved > 6) S.t = clamp(drag.t - dx * 1.4); });
-  const eat = (e) => { e.preventDefault(); e.stopPropagation(); };
-  addEventListener('pointerup', () => {
-    if (drag && drag.moved > 6) { track.addEventListener('click', eat, true); setTimeout(() => track.removeEventListener('click', eat, true), 50); }
-    drag = null;
-  });
-  track.addEventListener('dragstart', (e) => e.preventDefault());
-
+  /* ───────── Вертикальный скролл: параллакс героя и полоска прогресса ───────── */
   let heroImg = null;
-  const tick = () => {
-    if (!isMobile()) {
-      S.x += (S.t - S.x) * 0.085;
-      if (Math.abs(S.t - S.x) < 0.05) S.x = S.t;
-      track.style.transform = `translate3d(${-S.x}px,0,0)`;
-      if (heroImg) heroImg.style.translate = `${S.x * 0.22}px 0`;
-      progress.style.transform = `scaleX(${S.max ? S.x / S.max : 0})`;
-    }
-    requestAnimationFrame(tick);
+  const onScroll = () => {
+    const y = scrollY, max = document.documentElement.scrollHeight - innerHeight;
+    if (heroImg && y < innerHeight * 1.2) heroImg.style.translate = `0 ${y * 0.18}px`;
+    progress.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`;
   };
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') { closePanel(); closeModal(); closeLightbox(); } });
 
   /* ───────── Появление секций ───────── */
   const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.04 });
@@ -259,7 +216,7 @@
     track.classList.remove('is-ready');
     track.innerHTML = r.html() + footer();
     $$('[data-tg]').forEach((a) => (a.href = SITE.telegram));
-    S.x = S.t = 0; track.style.transform = ''; scrollTo(0, 0);
+    scrollTo(0, 0);
     heroImg = $('.hero__media img', track);
     $$('.nav__link').forEach((a) => {
       const n = NAV[a.dataset.i]; if (!n || n.modal) return;
@@ -267,8 +224,7 @@
     });
     updateFilterUI();
     // setTimeout, а не rAF: в фоновой вкладке rAF не тикает, и страница осталась бы невидимой
-    setTimeout(() => { track.classList.remove('is-leaving'); track.classList.add('is-ready'); measure(); observe(); }, 40);
-    $$('img', track).forEach((img) => img.complete || img.addEventListener('load', measure, { once: true }));
+    setTimeout(() => { track.classList.remove('is-leaving'); track.classList.add('is-ready'); observe(); onScroll(); }, 40);
   };
   const go = () => {
     closePanel(); closeModal();
@@ -277,7 +233,7 @@
     setTimeout(render, 450);
   };
   addEventListener('hashchange', go);
-  addEventListener('resize', () => { document.body.classList.toggle('mobile', isMobile()); if (isMobile()) track.style.transform = ''; measure(); });
+  addEventListener('resize', () => { document.body.classList.toggle('mobile', mq.matches); onScroll(); });
 
   /* ───────── Навигация и меню ───────── */
   $('#navList').innerHTML = NAV.map((n, i) => `<li>${n.modal
@@ -349,9 +305,8 @@
       tiles.className = html ? 'tiles' : 'tiles tiles--empty';
       tiles.innerHTML = html || 'Под такие фильтры ничего нет. Сбросьте часть условий.';
       tiles.style.opacity = 1;
-      measure(); observe();
-      if (!isMobile()) scrollToX(tiles.offsetLeft - innerWidth * 0.36);
-      else tiles.scrollIntoView({ behavior: 'smooth' });
+      observe();
+      tiles.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 300);
     updateFilterUI();
   };
@@ -395,8 +350,6 @@
   lb.addEventListener('click', closeLightbox);
 
   /* ───────── Старт ───────── */
-  document.body.classList.toggle('mobile', isMobile());
+  document.body.classList.toggle('mobile', mq.matches);
   go();
-  requestAnimationFrame(tick);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
 })();
